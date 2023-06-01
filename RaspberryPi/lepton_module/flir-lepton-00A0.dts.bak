@@ -1,0 +1,63 @@
+// #include <dt-bindings/pinctrl/am33xx.h>
+// #include <dt-bindings/interrupt-controller/irq.h>
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2837", "brcm,bcm2708", "brcm,bcm2709";
+
+	version = "00A0";
+
+	exclusive-use =
+		"GPIO8",
+		"GPIO10",
+		"GPIO11",
+		"GPIO17",
+		"spi0";
+
+	fragment@0 {
+		target = <&gpio>;
+		__overlay__ {
+			rpi_spi_pins: rpi_spi_pins {
+				brcm,pins = <11 9 8 17>;
+				brcm,function = <0 0 1 2>;
+				brcm,pull = <2 2 2 1>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&rpi_spi_pins>;
+
+			spidev@0 {
+				status = "disabled";
+			};
+			spidev@1 {
+				status = "disabled";
+			};
+
+			lepton2 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				compatible = "flir,lepton2";
+
+				reg = <0>;
+				spi-max-frequency = <24000000>;
+				spi-cpha;
+				spi-cpol;
+
+				interrupt-parent = <&gpio>;
+				interrupts = <17 0x00000001>;
+			};
+		};
+	};
+};
